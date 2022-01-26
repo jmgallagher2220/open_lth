@@ -15,6 +15,7 @@ import pruning.registry
 from pruning.mask import Mask
 from pruning.pruned_model import PrunedModel
 from training import train
+from foundations.step import Step
 
 
 @dataclass
@@ -121,12 +122,17 @@ class LotteryRunner(Runner):
 
     def _prune_level(self, level: int):
         new_location = self.desc.run_path(self.replicate, level)
+        initial_location = self.desc.run_path(self.replicate, 0)
+        first_step = Step(0, 100)    
+        
         if Mask.exists(new_location): return
 
         if level == 0:
             Mask.ones_like(models.registry.get(self.desc.model_hparams)).save(new_location)
         else:
             old_location = self.desc.run_path(self.replicate, level-1)
+            initial_model = models.registry.load(initial_location, first_step,
+                                         self.desc.model_hparams, self.desc.train_outputs)    
             model = models.registry.load(old_location, self.desc.train_end_step,
                                          self.desc.model_hparams, self.desc.train_outputs)
-            pruning.registry.get(self.desc.pruning_hparams)(model, Mask.load(old_location)).save(new_location)
+            pruning.registry.get(self.desc.pruning_hparams)(initial_model, model, Mask.load(old_location)).save(new_location)
