@@ -62,17 +62,25 @@ class Strategy(base.Strategy):
         initial_weights = {k: v.clone().cpu().detach().numpy()
                    for k, v in initial_model.state_dict().items()
                    if k in prunable_tensors}
-               
-        # Create a vector of all the unpruned weights in the model.
+
+        # Create vectors of the weights and get their difference
         weight_vector = np.concatenate([v[current_mask[k] == 1] for k, v in weights.items()])
         initial_weight_vector = np.concatenate([v[current_mask[k] == 1] for k, v in initial_weights.items()])        
-        final_weight_vector = weight_vector - initial_weight_vector        
-        threshold = np.sort(np.abs(final_weight_vector))[number_of_weights_to_prune]
-
-        new_mask = Mask({k: np.where(np.abs(v) > threshold, current_mask[k], np.zeros_like(v))
-                         for k, v in weights.items()})
+        final_weight_vector = weight_vector - initial_weight_vector       
+        
+        threshold = np.sort(np.abs(final_weight_vector))[number_of_weights_to_prune - 1] # Sort is least to greatest
+        
+        # Keep the weights that changed the most compared to their value in the first model
+        # Note that the weights get zeroed when they don't change enough compared to the threshold
+        # This will affect the math in the first component of the np.where code but this is ok since the current_mask[k] value
+        # will already have been zeroed from a prior pass
+        new_mask = Mask({k: np.where(np.abs(weights[k] - initial_weights[k]) > threshold, current_mask[k], np.zeros_like(v)) for k, v in weights.items()})               
+      
         for k in current_mask:
-            if k not in new_mask:
-                new_mask[k] = current_mask[k]
+                if k not in new_mask:
+                        new_mask[k] = current_mask[k]
+
+        #print("Number of remaining weights: " + str(number_of_remaining_weights))
+        #print("Number of weights to prune: " + str(number_of_weights_to_prune))
 
         return new_mask
