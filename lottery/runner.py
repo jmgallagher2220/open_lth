@@ -136,7 +136,7 @@ class LotteryRunner(Runner):
                                          self.desc.model_hparams, self.desc.train_outputs)    
                 model = models.registry.load(old_location, self.desc.train_end_step,
                                          self.desc.model_hparams, self.desc.train_outputs)
-                pruning.registry.get(self.desc.pruning_hparams)(model, Mask.load(old_location)).save(new_location)
+                pruning.registry.get(self.desc.pruning_hparams)(initial_model, model, Mask.load(old_location)).save(new_location)
             except:
                 old_location = self.desc.run_path(self.replicate, level-1)
                 model = models.registry.load(old_location, self.desc.train_end_step,
