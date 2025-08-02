@@ -9,8 +9,10 @@ from functools import partial
 from foundations.hparams import PruningHparams
 from pruning import sparse_global
 from pruning import smallest_delta
+from pruning import relative_delta
+from pruning import product_delta
 
-registered_strategies = {'sparse_global': sparse_global.Strategy, 'smallest_delta': smallest_delta.Strategy}
+registered_strategies = {'sparse_global': sparse_global.Strategy, 'smallest_delta': smallest_delta.Strategy, 'relative_delta': relative_delta.Strategy,'product_delta': product_delta.Strategy}
 
 
 def get(pruning_hparams: PruningHparams):

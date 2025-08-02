@@ -74,9 +74,9 @@ class Strategy(base.Strategy):
             if initial_weight_vector[k] != 0:
                 final_weight_vector[k] = (weight_vector[k] - initial_weight_vector[k])/initial_weight_vector[k] 
             else:
-                if weight_vector[k] == 0:
-                    final_weight_vector[k] = 0
-                else:
+                if weight_vector[k] == 0:       # Unnecessary 2 lines of code here, leaving in for historical purposes, will commit to repo. and then delete
+                    final_weight_vector[k] = 0  # (see note above, compare with next for loop code block)
+                else:                               
                     final_weight_vector[k] = 1
                   
         
@@ -87,20 +87,16 @@ class Strategy(base.Strategy):
         # This will affect the math in the first component of the np.where code but this is ok since the current_mask[k] value
         # will already have been zeroed from a prior pass
         
+        # The logic below is consistent with what is done for final_weight_vector[k] above but is written differently. 
+        # final_weight_vector[k] begins as a weight value from the current mask and needs to be converted to a percentage
         for k in weights:
             for index, value in enumerate(weights[k]):
                 for index2, value2 in enumerate(value):
-                    a = weights[k][index][index2]
                     if initial_weights[k][index][index2] != 0:
                         weights[k][index][index2] = (weights[k][index][index2] - initial_weights[k][index][index2])/initial_weights[k][index][index2]
                     else:
                         if weights[k][index][index2] != 0:
                             weights[k][index][index2] = 1
-                    # Print statements to validate code
-                    #if index < 1 and index2 < 10:
-                    #   print("Weight = " + str(a))
-                    #   print("Initial Weight = " + str(initial_weights[k][index][index2]))
-                    #   print("Final Weight (Relative Difference) = " + str(weights[k][index][index2]))
 
         new_mask = Mask({k: np.where(np.abs(weights[k]) > threshold, current_mask[k], np.zeros_like(v)) for k, v in weights.items()})               
       

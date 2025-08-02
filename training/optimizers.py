@@ -48,4 +48,4 @@ def get_lr_schedule(training_hparams: TrainingHparams, optimizer: torch.optim.Op
         lambdas.append(lambda it: min(1.0, it / warmup_iters))
 
     # Combine the lambdas.
-    return torch.optim.lr_scheduler.LambdaLR(optimizer, lambda it: np.product([l(it) for l in lambdas]))
+    return torch.optim.lr_scheduler.LambdaLR(optimizer, lambda it: np.prod([l(it) for l in lambdas]))

@@ -14,7 +14,7 @@ class TestMnistLenet(test_case.TestCase):
     def count_parameters(self, model):
         total = 0
         for _, v in model.named_parameters():
-            total += np.product(list(v.shape))
+            total += np.prod(list(v.shape))
         return total
 
     def test_valid_names(self):
